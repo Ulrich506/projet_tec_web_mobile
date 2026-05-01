@@ -3,8 +3,6 @@ name: Build Android APK
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
 
 jobs:
   build:
@@ -12,20 +10,24 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4[cite: 2]
 
-      - name: Buildozer Android Action
-        uses: ArtemSerebriakov/buildozer-action@v1
+      - name: Buildozer Action
+        uses: pypa/gh-action-pypi-publish@release/v1 # Option alternative ou script manuel
+        # Utilisons l'action officielle recommandée pour Kivy/Buildozer
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r25c
+
+      - name: Build with Buildozer
+        uses: ArtemSerebriakov/buildozer-action@v1.6.1 # Version spécifique stabilisée
         with:
           buildozer_version: stable
           python_version: 3.9
-          # Commande pour compiler en mode debug
-          command: buildozer android debug
-          # On accepte les licences automatiquement
-          repository_read_token: ${{ secrets.GITHUB_TOKEN }}
+          command: buildozer android debug[cite: 2]
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4 # Passage à la V4 pour éviter la dépréciation
         with:
           name: secure-node-apk
-          path: bin/*.apk
+          path: bin/*.apk[cite: 2]
