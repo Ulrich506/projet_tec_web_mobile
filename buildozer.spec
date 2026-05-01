@@ -7,7 +7,7 @@ package.domain = org.eni
 source.include_exts = py,png,jpg,kv,atlas
 
 # TRÈS IMPORTANT : Ajoute cryptography ici
-requirements = python3,kivy,cryptography
+requirements = python3,kivy,cryptography,openssl
 
 # Permissions pour le réseau et le maillage
 android.permissions = INTERNET, ACCESS_NETWORK_STATE
