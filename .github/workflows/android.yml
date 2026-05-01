@@ -1,0 +1,31 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Buildozer Android Action
+        uses: ArtemSerebriakov/buildozer-action@v1
+        with:
+          buildozer_version: stable
+          python_version: 3.9
+          # Commande pour compiler en mode debug
+          command: buildozer android debug
+          # On accepte les licences automatiquement
+          repository_read_token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: secure-node-apk
+          path: bin/*.apk
