@@ -10,7 +10,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4[cite: 2]
+        uses: actions/checkout@v4
 
       - name: Build with Buildozer
         uses: subzero-to/buildozer-action@v1
