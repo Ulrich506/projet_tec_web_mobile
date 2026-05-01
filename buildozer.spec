@@ -5,6 +5,7 @@ title = Secure Node
 package.name = securenode
 package.domain = org.eni
 
+version = 0.1
 # (section) Fichiers source
 # Assure-toi que ton fichier principal s'appelle bien main.py localement
 source.dir = .
