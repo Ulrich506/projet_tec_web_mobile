@@ -12,22 +12,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4[cite: 2]
 
-      - name: Buildozer Action
-        uses: pypa/gh-action-pypi-publish@release/v1 # Option alternative ou script manuel
-        # Utilisons l'action officielle recommandée pour Kivy/Buildozer
-        uses: nttld/setup-ndk@v1
-        with:
-          ndk-version: r25c
-
       - name: Build with Buildozer
-        uses: ArtemSerebriakov/buildozer-action@v1.6.1 # Version spécifique stabilisée
+        uses: subzero-to/buildozer-action@v1
         with:
           buildozer_version: stable
           python_version: 3.9
           command: buildozer android debug[cite: 2]
 
       - name: Upload APK Artifact
-        uses: actions/upload-artifact@v4 # Passage à la V4 pour éviter la dépréciation
+        uses: actions/upload-artifact@v4[cite: 2]
         with:
           name: secure-node-apk
           path: bin/*.apk[cite: 2]
