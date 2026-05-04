@@ -7,61 +7,56 @@ from kivy.uix.label import Label
 from kivy.core.window import Window
 from kivy.utils import get_color_from_hex
 
-# Style sombre Bootstrap/Gemini
+# --- CONFIGURATION CLAVIER ---
+# 'resize' force toute l'appli à remonter pour laisser la place au clavier
+Window.softinput_mode = 'resize'
 Window.clearcolor = get_color_from_hex('#1e1e1e')
 
 class SecureNodeInterface(BoxLayout):
     def __init__(self, **kwargs):
-        super().__init__(orientation='vertical', padding=[15, 10], spacing=15, **kwargs)
+        super().__init__(orientation='vertical', padding=[10, 10], spacing=10, **kwargs)
 
-        # --- Zone des Logs (Maillage) ---
-        # On lui donne un size_hint_y élevé pour qu'elle prenne toute la place
+        # Zone de log (prend tout l'espace restant)
         self.scroll = ScrollView(size_hint=(1, 1)) 
         self.log_output = Label(
-            text="[Système] Prêt. En attente de messages...\n",
+            text="[Système] Prêt...\n",
             size_hint_y=None,
             halign='left',
             valign='top',
-            font_size='16sp',
-            color=get_color_from_hex('#d1d1d1')
+            font_size='16sp'
         )
         self.log_output.bind(texture_size=self.log_output.setter('size'))
         self.scroll.add_widget(self.log_output)
         self.add_widget(self.scroll)
 
-        # --- Zone de saisie (Plus grande, style Gemini) ---
-        # On utilise une structure verticale pour empiler IP et Message
-        input_container = BoxLayout(orientation='vertical', spacing=10, size_hint_y=None, height=160)
+        # --- CONTAINER INPUT (Style Gemini) ---
+        # On agrandit la zone pour que ce soit bien visible
+        input_area = BoxLayout(orientation='vertical', spacing=8, size_hint_y=None, height=140)
 
-        # Champ IP : Plus haut et texte plus grand
         self.ip_input = TextInput(
             text='127.0.0.1', 
-            multiline=False, 
-            font_size='18sp',
             size_hint_y=None, height=55,
+            font_size='18sp',
             background_color=get_color_from_hex('#2d2d2d'),
             foreground_color=(1, 1, 1, 1),
-            padding=[15, 15],
-            hint_text="🌐 Adresse IP"
+            padding=[10, 15]
         )
 
-        # Ligne Message + Bouton (Style Input Group)
-        msg_line = BoxLayout(orientation='horizontal', spacing=10, size_hint_y=None, height=65)
+        msg_line = BoxLayout(orientation='horizontal', spacing=5, size_hint_y=None, height=65)
         
         self.msg_input = TextInput(
-            hint_text="Écrivez votre message sécurisé...", 
-            multiline=False,
+            hint_text="Message sécurisé...",
             font_size='18sp',
             background_color=get_color_from_hex('#2d2d2d'),
             foreground_color=(1, 1, 1, 1),
-            padding=[15, 18],
+            padding=[10, 18],
             size_hint_x=0.8
         )
         
         self.send_btn = Button(
-            text="🚀", # Icône Bootstrap Style
+            text="🚀",
             background_normal='',
-            background_color=get_color_from_hex('#0b5ed7'), # Bleu Bootstrap Primary
+            background_color=get_color_from_hex('#0b5ed7'),
             size_hint_x=0.2,
             bold=True
         )
@@ -69,10 +64,10 @@ class SecureNodeInterface(BoxLayout):
         msg_line.add_widget(self.msg_input)
         msg_line.add_widget(self.send_btn)
 
-        input_container.add_widget(self.ip_input)
-        input_container.add_widget(msg_line)
+        input_area.add_widget(self.ip_input)
+        input_area.add_widget(msg_line)
         
-        self.add_widget(input_container)
+        self.add_widget(input_area)
 
 class SecureNodeApp(App):
     def build(self):
