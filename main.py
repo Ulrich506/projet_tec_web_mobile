@@ -7,18 +7,52 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivy.utils import get_color_from_hex
+from kivy.properties import StringProperty
 
 # Configuration de la fenêtre (simulation mobile)
 Window.size = (360, 640)
 Window.softinput_mode = 'resize'
 
-# --- INTERFACE EN LANGAGE KV (Design MeshGuard) ---
-# Dans ton fichier Python, modifie le KV :
+# --- INTERFACE EN LANGAGE KV ---
 KV = '''
+<MessageBubble>:
+    orientation: "vertical"
+    padding: "12dp"
+    size_hint_x: 0.8
+    size_hint_y: None
+    height: self.minimum_height
+    radius: [15, 15, 15, 2] if root.side == "left" else [15, 15, 2, 15]
+    md_bg_color: get_color_from_hex("#1e293b") if root.side == "left" else get_color_from_hex("#005236")
+    line_color: get_color_from_hex("#4cd7f6") if root.side == "left" else get_color_from_hex("#4edea3")
+    line_width: 1
+    pos_hint: {"left": 1} if root.side == "left" else {"right": 1}
+
+    MDLabel:
+        text: root.sender_id
+        font_style: "Caption"
+        theme_text_color: "Custom"
+        text_color: get_color_from_hex("#4cd7f6") if root.side == "left" else get_color_from_hex("#4edea3")
+        size_hint_y: None
+        height: self.texture_size[1]
+        bold: True
+
+    MDLabel:
+        text: root.message_text
+        theme_text_color: "Custom"
+        text_color: 1, 1, 1, 1
+        size_hint_y: None
+        height: self.texture_size[1]
+
+    MDLabel:
+        text: root.hash_val
+        font_style: "Overline"
+        theme_text_color: "Hint"
+        size_hint_y: None
+        height: self.texture_size[1]
+
 MDScreen:
     md_bg_color: get_color_from_hex("#0e1511")
 
-    # On utilise un layout vertical principal
     MDBoxLayout:
         orientation: 'vertical'
 
@@ -27,6 +61,7 @@ MDScreen:
             title: "MESHGUARD_TERMINAL"
             md_bg_color: get_color_from_hex("#0e1511")
             elevation: 0
+            left_action_items: [["terminal", lambda x: None]]
 
         # 2. Zone de messages (prend tout l'espace disponible)
         ScrollView:
@@ -37,9 +72,9 @@ MDScreen:
                 size_hint_y: None
                 height: self.minimum_height
                 padding: "10dp"
-                spacing: "10dp"
+                spacing: "15dp"
 
-        # 3. Zone de saisie (fixe juste au-dessus de la nav ou du clavier)
+        # 3. Zone de saisie (fixe juste au-dessus de la nav)
         MDBoxLayout:
             size_hint_y: None
             height: "70dp"
@@ -52,12 +87,14 @@ MDScreen:
                 hint_text: "Entrer commande..."
                 mode: "fill"
                 fill_color_normal: get_color_from_hex("#2f3632")
-                # Important pour éviter que le texte soit coupé :
-                font_size: "16sp" 
+                font_size: "16sp"
+                text_color_normal: 1, 1, 1, 1
 
             MDIconButton:
                 icon: "send"
                 md_bg_color: get_color_from_hex("#10b981")
+                theme_text_color: "Custom"
+                text_color: 1, 1, 1, 1
                 on_release: app.send_message()
 
         # 4. Barre de Navigation (en bas de tout)
@@ -65,6 +102,7 @@ MDScreen:
             size_hint_y: None
             height: "65dp"
             panel_color: get_color_from_hex("#0e1511")
+            selected_color_background: 0, 0, 0, 0
             
             MDBottomNavigationItem:
                 name: 'terminal'
@@ -78,7 +116,12 @@ MDScreen:
 '''
 
 class MessageBubble(MDCard):
-    # Propriétés pour les bulles de message
+    # Utilisation de StringProperty pour l'affichage dynamique dans le KV[cite: 1]
+    sender_id = StringProperty()
+    message_text = StringProperty()
+    hash_val = StringProperty()
+    side = StringProperty()
+
     def __init__(self, sender_id, message_text, hash_val, side="left", **kwargs):
         super().__init__(**kwargs)
         self.sender_id = sender_id
@@ -95,7 +138,7 @@ class SecureNodeApp(MDApp):
     def send_message(self):
         msg_input = self.root.ids.msg_input
         if msg_input.text.strip() != "":
-            # 1. Calcul du SHA-256
+            # 1. Calcul du SHA-256 pour l'intégrité
             content = msg_input.text
             hash_res = hashlib.sha256(content.encode()).hexdigest()
             
