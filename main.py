@@ -10,7 +10,7 @@ from kivy.utils import get_color_from_hex
 from kivy.properties import StringProperty
 
 # Configuration de la fenêtre (simulation mobile)
-Window.size = (360, 640)
+#Window.size = (360, 640)
 Window.softinput_mode = 'resize'
 
 # --- INTERFACE EN LANGAGE KV ---
@@ -133,6 +133,11 @@ class SecureNodeApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
+        
+        # AJOUTE CECI : Forcer le système à donner toute la taille de l'écran
+        from kivy.core.window import Window
+        Window.minimum_width, Window.minimum_height = Window.size 
+        
         return Builder.load_string(KV)
 
     def send_message(self):
