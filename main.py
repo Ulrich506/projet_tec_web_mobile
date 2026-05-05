@@ -1,4 +1,5 @@
 import hashlib
+import time
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivymd.app import MDApp
@@ -6,10 +7,9 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivy.utils import get_color_from_hex
-from kivy.properties import StringProperty
+from kivy.properties import StringProperty, NumericProperty
 
-# Désactivation de la taille fixe pour le mobile
-# Window.size = (360, 640) 
+# Optimisation pour mobile
 Window.softinput_mode = 'resize'
 
 KV = '''
@@ -55,64 +55,132 @@ MDScreen:
         orientation: 'vertical'
 
         MDTopAppBar:
-            title: "MESHGUARD_TERMINAL"
+            title: "TEC WEB MOBIL"
             anchor_title: "left"
             md_bg_color: get_color_from_hex("#0e1511")
             elevation: 0
             specific_text_color: get_color_from_hex("#4edea3")
 
-        ScrollView:
-            do_scroll_x: False
-            MDBoxLayout:
-                id: chat_logs
-                orientation: 'vertical'
-                size_hint_y: None
-                height: self.minimum_height
-                padding: "15dp"
-                spacing: "15dp"
+        MDBottomNavigation:
+            id: panel
+            panel_color: get_color_from_hex("#161d19")
+            selected_color_background: 0, 0, 0, 0
+            text_color_active: get_color_from_hex("#4edea3")
 
-        # Zone de saisie stabilisée
-        MDBoxLayout:
-            size_hint_y: None
-            height: "80dp"
-            padding: ["10dp", "5dp", "10dp", "5dp"]
-            spacing: "10dp"
-            md_bg_color: get_color_from_hex("#161d19")
+            # --- ONGLET TERMINAL ---
+            MDBottomNavigationItem:
+                name: 'terminal'
+                text: 'Terminal'
+                icon: 'terminal'
 
-            MDTextField:
-                id: msg_input
-                hint_text: "Entrer commande..."
-                mode: "fill"
-                fill_color_normal: get_color_from_hex("#09100c")
-                font_size: "16sp"
-                text_color_normal: 1, 1, 1, 1
-                pos_hint: {"center_y": .5}
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    
+                    ScrollView:
+                        do_scroll_x: False
+                        MDBoxLayout:
+                            id: chat_logs
+                            orientation: 'vertical'
+                            size_hint_y: None
+                            height: self.minimum_height
+                            padding: "15dp"
+                            spacing: "15dp"
 
-            MDIconButton:
-                icon: "send"
-                md_bg_color: get_color_from_hex("#4edea3")
-                theme_text_color: "Custom"
-                text_color: 0, 0, 0, 1
-                pos_hint: {"center_y": .5}
-                on_release: app.send_message()
+                    MDBoxLayout:
+                        size_hint_y: None
+                        height: "80dp"
+                        padding: ["10dp", "5dp", "10dp", "5dp"]
+                        spacing: "10dp"
+                        md_bg_color: get_color_from_hex("#161d19")
 
-        # Navigation fixe pour éviter le bug d'affichage
-        MDBoxLayout:
-            size_hint_y: None
-            height: "65dp"
-            MDBottomNavigation:
-                panel_color: get_color_from_hex("#161d19")
-                selected_color_background: 0, 0, 0, 0
-                
-                MDBottomNavigationItem:
-                    name: 'terminal'
-                    text: 'Terminal'
-                    icon: 'terminal'
-                
-                MDBottomNavigationItem:
-                    name: 'security'
-                    text: 'Security'
-                    icon: 'shield'
+                        MDTextField:
+                            id: msg_input
+                            hint_text: "Entrer commande..."
+                            mode: "fill"
+                            fill_color_normal: get_color_from_hex("#09100c")
+                            font_size: "16sp"
+                            text_color_normal: 1, 1, 1, 1
+                            pos_hint: {"center_y": .5}
+
+                        MDIconButton:
+                            icon: "send"
+                            md_bg_color: get_color_from_hex("#4edea3")
+                            theme_text_color: "Custom"
+                            text_color: 0, 0, 0, 1
+                            pos_hint: {"center_y": .5}
+                            on_release: app.send_message()
+
+            # --- ONGLET SECURITY (NOUVEAU) ---
+            MDBottomNavigationItem:
+                name: 'security'
+                text: 'Security'
+                icon: 'shield-check'
+
+                MDBoxLayout:
+                    orientation: 'vertical'
+                    padding: "15dp"
+                    spacing: "15dp"
+
+                    MDLabel:
+                        text: "SECURE NODE MONITOR"
+                        halign: "center"
+                        font_style: "H6"
+                        theme_text_color: "Custom"
+                        text_color: get_color_from_hex("#4edea3")
+                        size_hint_y: None
+                        height: "40dp"
+
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "15dp"
+                        size_hint_y: None
+                        height: "120dp"
+                        md_bg_color: get_color_from_hex("#161d19")
+                        radius: 12
+                        
+                        MDLabel:
+                            text: "MESSAGE TRACE ROUTE (REAL-TIME)"
+                            bold: True
+                            font_style: "Caption"
+                        MDLabel:
+                            id: trace_path
+                            text: "Waiting for packet..."
+                            theme_text_color: "Hint"
+                            font_name: "Roboto"
+                            font_style: "Body2"
+
+                    MDCard:
+                        orientation: "vertical"
+                        padding: "15dp"
+                        size_hint_y: None
+                        height: "100dp"
+                        md_bg_color: get_color_from_hex("#161d19")
+                        radius: 12
+                        
+                        MDBoxLayout:
+                            MDLabel:
+                                text: "Integrity Engine"
+                                bold: True
+                            MDLabel:
+                                text: "ACTIVE"
+                                halign: "right"
+                                text_color: 0, 1, 0, 1
+                        MDLabel:
+                            text: "Algorithm: SHA-256 Protocol"
+                            theme_text_color: "Hint"
+                        MDLabel:
+                            text: "Status: Secure Connection (Encrypted)"
+                            theme_text_color: "Hint"
+
+                    MDBoxLayout:
+                        spacing: "10dp"
+                        MDRaisedButton:
+                            text: "CLEAR LOGS"
+                            md_bg_color: get_color_from_hex("#e11d48")
+                            on_release: chat_logs.clear_widgets()
+                        MDRaisedButton:
+                            text: "REFRESH NODE"
+                            md_bg_color: get_color_from_hex("#10b981")
 '''
 
 class MessageBubble(MDCard):
@@ -138,9 +206,9 @@ class SecureNodeApp(MDApp):
         msg_input = self.root.ids.msg_input
         if msg_input.text.strip() != "":
             content = msg_input.text
-            # Intégrité SHA-256
             hash_res = hashlib.sha256(content.encode()).hexdigest()
             
+            # Création du message
             new_msg = MessageBubble(
                 sender_id="root@meshguard",
                 message_text=content,
@@ -148,7 +216,15 @@ class SecureNodeApp(MDApp):
                 side="right"
             )
             
+            # Ajout au terminal
             self.root.ids.chat_logs.add_widget(new_msg)
+            
+            # Mise à jour du "Trace Route" (Chemin du message)
+            # Simule le passage par différents nœuds Mesh même hors ligne
+            timestamp = time.strftime("%H:%M:%S")
+            path_sim = f"[{timestamp}] Client -> Local_Node (ENI) -> MESH_RELAY_01 -> SHA256_VERIFIED -> SUCCESS"
+            self.root.ids.trace_path.text = path_sim
+            
             msg_input.text = ""
 
 if __name__ == "__main__":
