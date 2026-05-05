@@ -1,5 +1,4 @@
 import hashlib
-from datetime import datetime
 from kivy.lang import Builder
 from kivy.core.window import Window
 from kivymd.app import MDApp
@@ -9,11 +8,10 @@ from kivymd.uix.card import MDCard
 from kivy.utils import get_color_from_hex
 from kivy.properties import StringProperty
 
-# Configuration de la fenêtre (simulation mobile)
-#Window.size = (360, 640)
+# Désactivation de la taille fixe pour le mobile
+# Window.size = (360, 640) 
 Window.softinput_mode = 'resize'
 
-# --- INTERFACE EN LANGAGE KV ---
 KV = '''
 <MessageBubble>:
     orientation: "vertical"
@@ -56,14 +54,13 @@ MDScreen:
     MDBoxLayout:
         orientation: 'vertical'
 
-        # 1. Barre de titre (fixe en haut)
         MDTopAppBar:
             title: "MESHGUARD_TERMINAL"
+            anchor_title: "left"
             md_bg_color: get_color_from_hex("#0e1511")
             elevation: 0
-            left_action_items: [["terminal", lambda x: None]]
+            specific_text_color: get_color_from_hex("#4edea3")
 
-        # 2. Zone de messages (prend tout l'espace disponible)
         ScrollView:
             do_scroll_x: False
             MDBoxLayout:
@@ -71,52 +68,54 @@ MDScreen:
                 orientation: 'vertical'
                 size_hint_y: None
                 height: self.minimum_height
-                padding: "10dp"
+                padding: "15dp"
                 spacing: "15dp"
 
-        # 3. Zone de saisie (fixe juste au-dessus de la nav)
+        # Zone de saisie stabilisée
         MDBoxLayout:
             size_hint_y: None
-            height: "70dp"
-            padding: "8dp"
-            spacing: "8dp"
-            md_bg_color: get_color_from_hex("#1a211d")
+            height: "80dp"
+            padding: ["10dp", "5dp", "10dp", "5dp"]
+            spacing: "10dp"
+            md_bg_color: get_color_from_hex("#161d19")
 
             MDTextField:
                 id: msg_input
                 hint_text: "Entrer commande..."
                 mode: "fill"
-                fill_color_normal: get_color_from_hex("#2f3632")
+                fill_color_normal: get_color_from_hex("#09100c")
                 font_size: "16sp"
                 text_color_normal: 1, 1, 1, 1
+                pos_hint: {"center_y": .5}
 
             MDIconButton:
                 icon: "send"
-                md_bg_color: get_color_from_hex("#10b981")
+                md_bg_color: get_color_from_hex("#4edea3")
                 theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
+                text_color: 0, 0, 0, 1
+                pos_hint: {"center_y": .5}
                 on_release: app.send_message()
 
-        # 4. Barre de Navigation (en bas de tout)
-        MDBottomNavigation:
+        # Navigation fixe pour éviter le bug d'affichage
+        MDBoxLayout:
             size_hint_y: None
             height: "65dp"
-            panel_color: get_color_from_hex("#0e1511")
-            selected_color_background: 0, 0, 0, 0
-            
-            MDBottomNavigationItem:
-                name: 'terminal'
-                text: 'Terminal'
-                icon: 'terminal'
-            
-            MDBottomNavigationItem:
-                name: 'security'
-                text: 'Security'
-                icon: 'shield'
+            MDBottomNavigation:
+                panel_color: get_color_from_hex("#161d19")
+                selected_color_background: 0, 0, 0, 0
+                
+                MDBottomNavigationItem:
+                    name: 'terminal'
+                    text: 'Terminal'
+                    icon: 'terminal'
+                
+                MDBottomNavigationItem:
+                    name: 'security'
+                    text: 'Security'
+                    icon: 'shield'
 '''
 
 class MessageBubble(MDCard):
-    # Utilisation de StringProperty pour l'affichage dynamique dans le KV[cite: 1]
     sender_id = StringProperty()
     message_text = StringProperty()
     hash_val = StringProperty()
@@ -133,21 +132,15 @@ class SecureNodeApp(MDApp):
     def build(self):
         self.theme_cls.theme_style = "Dark"
         self.theme_cls.primary_palette = "Teal"
-        
-        # AJOUTE CECI : Forcer le système à donner toute la taille de l'écran
-        from kivy.core.window import Window
-        Window.minimum_width, Window.minimum_height = Window.size 
-        
         return Builder.load_string(KV)
 
     def send_message(self):
         msg_input = self.root.ids.msg_input
         if msg_input.text.strip() != "":
-            # 1. Calcul du SHA-256 pour l'intégrité
             content = msg_input.text
+            # Intégrité SHA-256
             hash_res = hashlib.sha256(content.encode()).hexdigest()
             
-            # 2. Création de la bulle (Outgoing)
             new_msg = MessageBubble(
                 sender_id="root@meshguard",
                 message_text=content,
@@ -155,7 +148,6 @@ class SecureNodeApp(MDApp):
                 side="right"
             )
             
-            # 3. Ajout à l'interface
             self.root.ids.chat_logs.add_widget(new_msg)
             msg_input.text = ""
 
