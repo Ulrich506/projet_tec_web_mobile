@@ -13,102 +13,66 @@ Window.size = (360, 640)
 Window.softinput_mode = 'resize'
 
 # --- INTERFACE EN LANGAGE KV (Design MeshGuard) ---
+# Dans ton fichier Python, modifie le KV :
 KV = '''
-<MessageBubble>:
-    orientation: "vertical"
-    padding: "12dp"
-    size_hint_x: 0.8
-    radius: [15, 15, 15, 0] if self.side == "left" else [15, 15, 0, 15]
-    md_bg_color: get_color_from_hex("#1e293b") if self.side == "left" else get_color_from_hex("#0f172a")
-    line_color: get_color_from_hex("#4cd7f6") if self.side == "left" else get_color_from_hex("#4edea3")
-    pos_hint: {"left": 1} if self.side == "left" else {"right": 1}
-    size_hint_y: None
-    height: self.minimum_height
-
-    MDLabel:
-        text: root.sender_id
-        font_style: "Caption"
-        theme_text_color: "Custom"
-        text_color: get_color_from_hex("#4cd7f6") if root.side == "left" else get_color_from_hex("#4edea3")
-        size_hint_y: None
-        height: self.texture_size[1]
-
-    MDLabel:
-        text: root.message_text
-        theme_text_color: "Custom"
-        text_color: 1, 1, 1, 1
-        size_hint_y: None
-        height: self.texture_size[1]
-        font_name: "Roboto"
-
-    MDLabel:
-        text: root.hash_val
-        font_style: "Overline"
-        theme_text_color: "Hint"
-        size_hint_y: None
-        height: self.texture_size[1]
-
 MDScreen:
     md_bg_color: get_color_from_hex("#0e1511")
 
+    # On utilise un layout vertical principal
     MDBoxLayout:
         orientation: 'vertical'
 
-        # Toolbar supérieure
+        # 1. Barre de titre (fixe en haut)
         MDTopAppBar:
-            title: "MeshGuard Terminal"
-            anchor_title: "left"
-            right_action_items: [["account-circle", lambda x: None]]
+            title: "MESHGUARD_TERMINAL"
             md_bg_color: get_color_from_hex("#0e1511")
-            elevation: 2
+            elevation: 0
 
-        # Zone des messages (Scroll)
+        # 2. Zone de messages (prend tout l'espace disponible)
         ScrollView:
+            do_scroll_x: False
             MDBoxLayout:
                 id: chat_logs
                 orientation: 'vertical'
-                padding: "10dp"
-                spacing: "15dp"
                 size_hint_y: None
                 height: self.minimum_height
+                padding: "10dp"
+                spacing: "10dp"
 
-        # Zone d'Input (Style Cyber)
+        # 3. Zone de saisie (fixe juste au-dessus de la nav ou du clavier)
         MDBoxLayout:
             size_hint_y: None
-            height: "80dp"
-            padding: "10dp"
-            spacing: "10dp"
+            height: "70dp"
+            padding: "8dp"
+            spacing: "8dp"
             md_bg_color: get_color_from_hex("#1a211d")
 
             MDTextField:
                 id: msg_input
-                hint_text: "root@meshguard:~# Enter message"
+                hint_text: "Entrer commande..."
                 mode: "fill"
                 fill_color_normal: get_color_from_hex("#2f3632")
-                text_color_normal: 1, 1, 1, 1
-                hint_text_color_normal: get_color_from_hex("#bbcabf")
+                # Important pour éviter que le texte soit coupé :
+                font_size: "16sp" 
 
             MDIconButton:
                 icon: "send"
-                theme_text_color: "Custom"
-                text_color: 1, 1, 1, 1
                 md_bg_color: get_color_from_hex("#10b981")
                 on_release: app.send_message()
 
-        # Navigation Basse
+        # 4. Barre de Navigation (en bas de tout)
         MDBottomNavigation:
             size_hint_y: None
             height: "65dp"
-            selected_color_background: 0, 0, 0, 0
-            text_color_active: get_color_from_hex("#4edea3")
-
+            panel_color: get_color_from_hex("#0e1511")
+            
             MDBottomNavigationItem:
-                name: 'screen 1'
+                name: 'terminal'
                 text: 'Terminal'
                 icon: 'terminal'
-
+            
             MDBottomNavigationItem:
-                name: 'screen 2'
+                name: 'security'
                 text: 'Security'
                 icon: 'shield'
 '''
