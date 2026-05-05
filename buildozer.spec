@@ -20,8 +20,7 @@ source.include_exts = py,png,jpg,kv,atlas
 
 # Dépendances (Standard + Chiffrement + MQTT)
 # Note : openssl est obligatoire pour cryptography sur Android
-requirements = python3,kivy==2.3.0,cryptography,paho-mqtt,openssl
-
+requirements = python3, kivy, kivymd, openssl
 # Orientation et permissions
 orientation = portrait
 android.permissions = INTERNET, ACCESS_NETWORK_STATE
