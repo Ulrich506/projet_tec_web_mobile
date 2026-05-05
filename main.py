@@ -7,9 +7,9 @@ from kivymd.uix.screen import MDScreen
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.card import MDCard
 from kivy.utils import get_color_from_hex
-from kivy.properties import StringProperty, NumericProperty
+from kivy.properties import StringProperty
 
-# Optimisation pour mobile
+# Configuration pour que l'interface monte avec le clavier
 Window.softinput_mode = 'resize'
 
 KV = '''
@@ -64,7 +64,6 @@ MDScreen:
         MDBottomNavigation:
             id: panel
             panel_color: get_color_from_hex("#161d19")
-            selected_color_background: 0, 0, 0, 0
             text_color_active: get_color_from_hex("#4edea3")
 
             # --- ONGLET TERMINAL ---
@@ -86,101 +85,80 @@ MDScreen:
                             padding: "15dp"
                             spacing: "15dp"
 
+                    # Zone de saisie double (IP + Message)
                     MDBoxLayout:
+                        orientation: 'vertical'
                         size_hint_y: None
-                        height: "80dp"
-                        padding: ["10dp", "5dp", "10dp", "5dp"]
-                        spacing: "10dp"
-                        md_bg_color: get_color_from_hex("#161d19")
+                        height: "130dp"
+                        padding: "10dp"
+                        spacing: "8dp"
+                        md_bg_color: get_color_from_hex("#1a211d")
 
                         MDTextField:
-                            id: msg_input
-                            hint_text: "Entrer commande..."
+                            id: ip_address
+                            hint_text: "IP Destinataire (ex: 192.168.1.5)"
                             mode: "fill"
                             fill_color_normal: get_color_from_hex("#09100c")
-                            font_size: "16sp"
+                            size_hint_y: None
+                            height: "40dp"
                             text_color_normal: 1, 1, 1, 1
-                            pos_hint: {"center_y": .5}
 
-                        MDIconButton:
-                            icon: "send"
-                            md_bg_color: get_color_from_hex("#4edea3")
-                            theme_text_color: "Custom"
-                            text_color: 0, 0, 0, 1
-                            pos_hint: {"center_y": .5}
-                            on_release: app.send_message()
+                        MDBoxLayout:
+                            spacing: "10dp"
+                            MDTextField:
+                                id: msg_input
+                                hint_text: "Entrer commande..."
+                                mode: "fill"
+                                fill_color_normal: get_color_from_hex("#09100c")
+                                text_color_normal: 1, 1, 1, 1
 
-            # --- ONGLET SECURITY (NOUVEAU) ---
+                            MDIconButton:
+                                icon: "send"
+                                md_bg_color: get_color_from_hex("#4edea3")
+                                theme_text_color: "Custom"
+                                text_color: 0, 0, 0, 1
+                                on_release: app.send_message()
+
+            # --- ONGLET SECURITY (Schéma de Trajet) ---
             MDBottomNavigationItem:
                 name: 'security'
                 text: 'Security'
-                icon: 'shield-check'
+                icon: 'shield-network'
 
                 MDBoxLayout:
                     orientation: 'vertical'
-                    padding: "15dp"
-                    spacing: "15dp"
+                    padding: "20dp"
+                    spacing: "10dp"
 
                     MDLabel:
-                        text: "SECURE NODE MONITOR"
+                        text: "MESH TOPOLOGY TRACKER"
                         halign: "center"
-                        font_style: "H6"
+                        bold: True
                         theme_text_color: "Custom"
                         text_color: get_color_from_hex("#4edea3")
-                        size_hint_y: None
-                        height: "40dp"
 
+                    # Schéma visuel simplifié
                     MDCard:
                         orientation: "vertical"
                         padding: "15dp"
-                        size_hint_y: None
-                        height: "120dp"
                         md_bg_color: get_color_from_hex("#161d19")
-                        radius: 12
+                        radius: 15
                         
                         MDLabel:
-                            text: "MESSAGE TRACE ROUTE (REAL-TIME)"
-                            bold: True
-                            font_style: "Caption"
-                        MDLabel:
-                            id: trace_path
-                            text: "Waiting for packet..."
-                            theme_text_color: "Hint"
+                            id: schema_visual
+                            text: "● (YOU)\\n  │\\n  ▼\\n○ (NODE_ENI)\\n  │\\n  ▼\\n✸ (RELAY_MESH)\\n  │\\n  ▼\\n◎ (TARGET_IP)"
+                            halign: "center"
                             font_name: "Roboto"
-                            font_style: "Body2"
+                            font_style: "H5"
+                            theme_text_color: "Custom"
+                            text_color: get_color_from_hex("#4edea3")
 
-                    MDCard:
-                        orientation: "vertical"
-                        padding: "15dp"
-                        size_hint_y: None
-                        height: "100dp"
-                        md_bg_color: get_color_from_hex("#161d19")
-                        radius: 12
-                        
-                        MDBoxLayout:
-                            MDLabel:
-                                text: "Integrity Engine"
-                                bold: True
-                            MDLabel:
-                                text: "ACTIVE"
-                                halign: "right"
-                                text_color: 0, 1, 0, 1
-                        MDLabel:
-                            text: "Algorithm: SHA-256 Protocol"
-                            theme_text_color: "Hint"
-                        MDLabel:
-                            text: "Status: Secure Connection (Encrypted)"
-                            theme_text_color: "Hint"
-
-                    MDBoxLayout:
-                        spacing: "10dp"
-                        MDRaisedButton:
-                            text: "CLEAR LOGS"
-                            md_bg_color: get_color_from_hex("#e11d48")
-                            on_release: chat_logs.clear_widgets()
-                        MDRaisedButton:
-                            text: "REFRESH NODE"
-                            md_bg_color: get_color_from_hex("#10b981")
+                    MDLabel:
+                        id: trace_details
+                        text: "Status: Idle\\nLast Packet: None"
+                        halign: "center"
+                        theme_text_color: "Hint"
+                        font_style: "Caption"
 '''
 
 class MessageBubble(MDCard):
@@ -203,29 +181,28 @@ class SecureNodeApp(MDApp):
         return Builder.load_string(KV)
 
     def send_message(self):
-        msg_input = self.root.ids.msg_input
-        if msg_input.text.strip() != "":
-            content = msg_input.text
-            hash_res = hashlib.sha256(content.encode()).hexdigest()
+        ip = self.root.ids.ip_address.text
+        msg = self.root.ids.msg_input.text
+        
+        if msg.strip() != "" and ip.strip() != "":
+            # SHA-256 Intégrité
+            h = hashlib.sha256(msg.encode()).hexdigest()
             
-            # Création du message
+            # Ajout à l'interface
             new_msg = MessageBubble(
-                sender_id="root@meshguard",
-                message_text=content,
-                hash_val=hash_res,
+                sender_id=f"TO: {ip}",
+                message_text=msg,
+                hash_val=h,
                 side="right"
             )
-            
-            # Ajout au terminal
             self.root.ids.chat_logs.add_widget(new_msg)
             
-            # Mise à jour du "Trace Route" (Chemin du message)
-            # Simule le passage par différents nœuds Mesh même hors ligne
-            timestamp = time.strftime("%H:%M:%S")
-            path_sim = f"[{timestamp}] Client -> Local_Node (ENI) -> MESH_RELAY_01 -> SHA256_VERIFIED -> SUCCESS"
-            self.root.ids.trace_path.text = path_sim
+            # Mise à jour du Schéma de trajet (Vertical/Etoile)
+            t = time.strftime("%H:%M:%S")
+            self.root.ids.schema_visual.text = f"● (YOU)\\n  │\\n  ▼\\n○ (NODE_ENI)\\n  │  [OK]\\n  ▼\\n✸ (RELAY_MESH)\\n  │  [HASH:{h[:4]}]\\n  ▼\\n◎ ({ip})"
+            self.root.ids.trace_details.text = f"Status: PACKET DELIVERED\\nTime: {t}\\nTarget: {ip}"
             
-            msg_input.text = ""
+            self.root.ids.msg_input.text = ""
 
 if __name__ == "__main__":
     SecureNodeApp().run()
