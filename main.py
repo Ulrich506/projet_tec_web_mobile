@@ -140,15 +140,14 @@ MDScreen:
                     # Schéma visuel simplifié
                     MDCard:
                         orientation: "vertical"
-                        padding: "15dp"
+                        padding: "20dp"
                         md_bg_color: get_color_from_hex("#161d19")
                         radius: 15
                         
                         MDLabel:
                             id: schema_visual
-                            text: "● (YOU)\\n  │\\n  ▼\\n○ (NODE_ENI)\\n  │\\n  ▼\\n✸ (RELAY_MESH)\\n  │\\n  ▼\\n◎ (TARGET_IP)"
+                            text: "O (MOI)\\n  |\\n  v\\n[NODE_ENI]\\n  |\\n  v\\n>>> (CIBLE)"
                             halign: "center"
-                            font_name: "Roboto"
                             font_style: "H5"
                             theme_text_color: "Custom"
                             text_color: get_color_from_hex("#4edea3")
@@ -197,9 +196,9 @@ class SecureNodeApp(MDApp):
             )
             self.root.ids.chat_logs.add_widget(new_msg)
             
-            # Mise à jour du Schéma de trajet (Vertical/Etoile)
+            # Mise à jour du Schéma de trajet (Caractères Universels)
             t = time.strftime("%H:%M:%S")
-            self.root.ids.schema_visual.text = f"● (YOU)\\n  │\\n  ▼\\n○ (NODE_ENI)\\n  │  [OK]\\n  ▼\\n✸ (RELAY_MESH)\\n  │  [HASH:{h[:4]}]\\n  ▼\\n◎ ({ip})"
+            self.root.ids.schema_visual.text = f"O (MOI)\\n  |\\n  v\\n[NODE_ENI]\\n  | [SENDING]\\n  v\\n>>> ({ip})"
             self.root.ids.trace_details.text = f"Status: PACKET DELIVERED\\nTime: {t}\\nTarget: {ip}"
             
             self.root.ids.msg_input.text = ""
